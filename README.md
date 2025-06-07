@@ -42,7 +42,7 @@ A browser-based tool to simulate a Denial-of-Service (DoS) attack by repeatedly 
 
 ## 🖼️ Screenshot
 
-> _Add a screenshot named `screenshot.png` here for a visual preview_
+![Screenshot of iframe-DOS tool](screenshot.png)
 
 ```bash
 iframe-dos/
