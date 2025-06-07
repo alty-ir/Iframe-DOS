@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>iframe-DOS Tool</title>
+  <meta name="description" content="A browser-based tool to simulate a DoS attack by refreshing a target URL in multiple iframes. For educational use only.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -71,15 +73,17 @@
   <h1>iframe-DOS Tool</h1>
   <p>For testing and educational purposes only.</p>
 
-  <div class="input-group">
-    <input type="text" id="url" placeholder="Target URL (e.g., http://example.com)">
-    <input type="number" id="time" value="125" min="50" placeholder="Refresh interval (min 50ms)">
-    <input type="number" id="frames" value="3" min="1" max="10" placeholder="Number of iframes">
+  <form class="input-group" onsubmit="return false;">
+    <label for="url">Target URL:</label>
+    <input type="text" id="url" placeholder="Target URL (e.g., http://example.com)" aria-label="Target URL">
+    <label for="time">Refresh interval (min 50ms):</label>
+    <input type="number" id="time" value="125" min="50" placeholder="Refresh interval (min 50ms)" aria-label="Refresh interval">
+    <label for="frames">Number of iframes:</label>
+    <input type="number" id="frames" value="3" min="1" max="10" placeholder="Number of iframes" aria-label="Number of iframes">
     <input type="button" id="toggleBtn" value="Start Attack">
-  </div>
+  </form>
 
   <div id="iframeContainer"></div>
-
   <div id="log"></div>
 
   <script>
@@ -100,16 +104,24 @@
       document.getElementById("iframeContainer").innerHTML = "";
     }
 
+    function isValidUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     function run() {
       const url = document.getElementById("url").value.trim();
-      let interval = parseInt(document.getElementById("time").value, 10);
-      let frameCount = parseInt(document.getElementById("frames").value, 10);
+      const interval = parseInt(document.getElementById("time").value, 10);
+      const frameCount = parseInt(document.getElementById("frames").value, 10);
 
-      if (!url || isNaN(interval) || interval < 50) {
-        alert("Please enter a valid URL and minimum refresh time of 50ms.");
+      if (!isValidUrl(url) || isNaN(interval) || interval < 50) {
+        alert("Please enter a valid URL (http/https) and minimum refresh time of 50ms.");
         return;
       }
-
       if (frameCount < 1 || frameCount > 10) {
         alert("Iframe count must be between 1 and 10.");
         return;
@@ -122,8 +134,11 @@
         const iframe = document.createElement("iframe");
         iframe.width = "300";
         iframe.height = "250";
-        iframe.sandbox = "";
+        iframe.sandbox = "allow-scripts allow-same-origin";
         iframe.id = `frame-${i}`;
+        iframe.setAttribute('referrerpolicy', 'no-referrer');
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('title', `Target iframe ${i+1}`);
         container.appendChild(iframe);
       }
 
@@ -165,5 +180,8 @@
       }
     };
   </script>
+  <footer style="margin-top:2rem;font-size:0.85rem;color:#888;">
+    <strong>Security note:</strong> Iframes use sandboxing and do not bypass CORS or X-Frame-Options. For legal, educational use only.
+  </footer>
 </body>
 </html>
